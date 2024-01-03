@@ -25,7 +25,7 @@ export default function SetData({ next }: { next: (data: string) => void }) {
   return (
     <>
       <div className="flex flex-col gap-2 p-5 m-5 bg-gray-200 font-mono">
-        <p>먼저 시뮬레이션의 정보를 적어주세요.</p>
+        <p>시뮬레이션의 정보를 설정합니다.</p>
         <Line highlighted />
         <Warning>
           name은 다른 시뮬레이션과 겹치지 않아야 합니다. 다른 시뮬레이션의
