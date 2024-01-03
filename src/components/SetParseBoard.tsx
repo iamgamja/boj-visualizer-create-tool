@@ -4,6 +4,7 @@ import Button from "./Button";
 import Line from "./Line";
 import Select from "./Select";
 import SelectColor from "./SelectColor";
+import Warning from "./Warning";
 
 type InputType_line = { type: "line"; vars: string[] };
 
@@ -54,7 +55,8 @@ const rule_options = {
   "항상 거짓인 조건": "() => false",
   "항상 참인 조건": "() => true",
   "특정 문자": "({s}) => s === '?'",
-  "특정 좌표": "({y, x}) => y === +(?) && x === +(?)",
+  "특정 좌표 (변수 or 상수)":
+    "({y, x}) => {const tmp_1 = '?'; const tmp_2 = '?'; return y === +(vars[tmp_1] ?? tmp_1) && x === +(vars[tmp_2] ?? tmp_2)}",
 } as const;
 type rule_options = typeof rule_options;
 
@@ -72,7 +74,7 @@ type ruleobj =
       detail: [string];
     }
   | {
-      name: "특정 좌표";
+      name: "특정 좌표 (변수 or 상수)";
       detail: [y: string, x: string];
     };
 
@@ -207,8 +209,6 @@ export default function SetParseBoard({
 
         for (let y=0; y<N; y++) {
           for (let x=0; x<M; x++) {
-            
-
             ${board.cellTypes
               .map((celltype, idx) => {
                 let func: string = rule_options[celltype.rule.name];
@@ -272,9 +272,9 @@ export default function SetParseBoard({
                 `;
               })
               .join(" ")}
-                else {
-                  throw new Error("잘못된 입력");
-                }
+            else {
+              throw new Error("잘못된 입력");
+            }
           }
         }
 
@@ -286,13 +286,14 @@ export default function SetParseBoard({
   return (
     <>
       <div className="flex flex-col gap-2 p-5 m-5 bg-gray-200 font-mono">
-        입력을 파싱하는 함수를 만듭니다. board는 정확히 한 번 입력받아야 합니다.
+        <p>입력을 파싱하는 함수를 만듭니다.</p>
+        <Warning>board는 정확히 한 번 입력받아야 합니다.</Warning>
         <Line highlighted />
         {inputs.map((t, idx) => (
           <div className="flex flex-col gap-2" key={idx}>
             {t.type === "line" && (
               <>
-                이 줄에서 {t.vars.length}개의 변수를 입력받습니다.
+                <p>이 줄에서 {t.vars.length}개의 변수를 입력받습니다.</p>
                 {t.vars.map((_, idx_line) => (
                   <Input
                     label={`${idx_line + 1}번째 변수`}
@@ -324,11 +325,19 @@ export default function SetParseBoard({
 
             {t.type === "board" && (
               <>
-                이 줄부터 {t.N}개의 줄에서 board를 입력받습니다. 각 줄은 {t.M}
-                개의 칸을 {t.space ? "공백으로 구분하여" : "공백 없이"} 나타내는
-                문자열입니다.
+                <p>
+                  이 줄부터 {t.N}개의 줄에서 board를 입력받습니다. 각 줄은 {t.M}
+                  개의 칸을 {t.space ? "공백으로 구분하여" : "공백 없이"}{" "}
+                  나타내는 문자열입니다.
+                </p>
+                <Warning>
+                  기본적으로 변수를 모두 입력받은 뒤 board를 parsing하기 때문에
+                  board의 입력 과정에서 변수를 사용할 수 있습니다. 그러나 다음
+                  두 입력은 board의 크기를 나타내기 때문에, 변수를 사용한다면
+                  board보다 먼저 입력받아야 합니다.
+                </Warning>
                 <Input
-                  label="N"
+                  label="N (변수 or 상수)"
                   value={t.N}
                   onChange={(s) => {
                     setInputs((prev) => {
@@ -339,7 +348,7 @@ export default function SetParseBoard({
                   }}
                 />
                 <Input
-                  label="M"
+                  label="M (변수 or 상수)"
                   value={t.M}
                   onChange={(s) => {
                     setInputs((prev) => {
@@ -350,19 +359,25 @@ export default function SetParseBoard({
                   }}
                 />
                 <Line highlighted />
-                각 칸을 다음과 같이 name으로 구분합니다. 예외적으로
-                name=Player인 칸은 정확히 한 칸만 존재해야 하며, 그 칸은
-                name=Empty로 처리됩니다.
+                <p>
+                  parsing 과정에서 각 칸을 다음과 같이 name으로 구분합니다.
+                  name은 시뮬레이션 중 변경될 수 있습니다.
+                </p>
+                <Warning>
+                  예외적으로 name=Player인 칸은 정확히 한 칸만 존재해야 하며, 그
+                  칸은 name=Empty로 처리됩니다.
+                </Warning>
                 <Line highlighted />
                 {t.cellTypes.map((celltype, idx_board) => (
                   <div className="flex flex-col gap-2" key={idx_board}>
-                    {idx_board !== 0 && "아니고"} 만약 {celltype.rule.name}
-                    {celltype.rule.name === "특정 좌표" &&
-                      `(${celltype.rule.detail[0]}, ${celltype.rule.detail[1]})`}
-                    {celltype.rule.name === "특정 문자" &&
-                      `(${celltype.rule.detail[0]})`}{" "}
-                    (이)라면 {celltype.name}
-                    입니다.
+                    <p>
+                      {idx_board !== 0 && "아니고"} 만약 {celltype.rule.name}
+                      {celltype.rule.name === "특정 좌표 (변수 or 상수)" &&
+                        `(${celltype.rule.detail[0]}, ${celltype.rule.detail[1]})`}
+                      {celltype.rule.name === "특정 문자" &&
+                        `(${celltype.rule.detail[0]})`}{" "}
+                      (이)라면 {celltype.name}입니다.
+                    </p>
                     <Input
                       label="name"
                       value={celltype.name}
@@ -400,7 +415,7 @@ export default function SetParseBoard({
                               },
                               value: [],
                             };
-                          else if (v === "특정 좌표")
+                          else if (v === "특정 좌표 (변수 or 상수)")
                             t.cellTypes[idx_board] = {
                               name: t.cellTypes[idx_board].name,
                               rule: {
@@ -438,10 +453,9 @@ export default function SetParseBoard({
                         });
                       }}
                     />
-                    {celltype.rule.name === "특정 좌표" && (
+                    {celltype.rule.name === "특정 좌표 (변수 or 상수)" && (
                       <>
                         <Input
-                          type={"number"}
                           label="y"
                           value={celltype.rule.detail[0].toString()}
                           onChange={(s) => {
@@ -454,7 +468,6 @@ export default function SetParseBoard({
                           key={"y"}
                         />
                         <Input
-                          type={"number"}
                           label="x"
                           value={celltype.rule.detail[1].toString()}
                           onChange={(s) => {
@@ -485,19 +498,17 @@ export default function SetParseBoard({
                       </>
                     )}
                     <Line />
-                    <div>
-                      이 칸은 다음과 같이 보입니다.{" "}
-                      <div
-                        className={`inline-flex items-center justify-center size-10 border-[1px] border-black relative ${celltype.style.backgroundColor} ${celltype.style.textColor}`}
-                      >
-                        {(celltype.style.text.name === "cell의 값 사용" ||
-                          celltype.style.text.name === "board의 값 사용") &&
-                          "{"}
-                        {celltype.style.text.detail[0]}
-                        {(celltype.style.text.name === "cell의 값 사용" ||
-                          celltype.style.text.name === "board의 값 사용") &&
-                          "}"}
-                      </div>
+                    <p>이 칸은 다음과 같이 보입니다.</p>
+                    <div
+                      className={`inline-flex items-center justify-center size-10 border-[1px] border-black relative ${celltype.style.backgroundColor} ${celltype.style.textColor}`}
+                    >
+                      {(celltype.style.text.name === "cell의 값 사용" ||
+                        celltype.style.text.name === "board의 값 사용") &&
+                        "{"}
+                      {celltype.style.text.detail[0]}
+                      {(celltype.style.text.name === "cell의 값 사용" ||
+                        celltype.style.text.name === "board의 값 사용") &&
+                        "}"}
                     </div>
                     <SelectColor
                       label="색"
@@ -569,13 +580,15 @@ export default function SetParseBoard({
                         }}
                       />
                     )}
-                    <Line />이 칸은 다음 {celltype.value.length}개의 값을
-                    가집니다.
+                    <Line />
+                    <p>
+                      이 칸은 다음 {celltype.value.length}개의 값을 가집니다.
+                    </p>
                     {celltype.value.map((v, idx_var) => {
                       const v_type = v.type;
                       return (
                         <div className="flex flex-col gap-2" key={idx_var}>
-                          변수 {idx_var + 1}:
+                          <p>{idx_var + 1}번째 값:</p>
                           <Input
                             label="이름"
                             value={v.name}
@@ -666,7 +679,7 @@ export default function SetParseBoard({
                     <Line highlighted />
                   </div>
                 ))}
-                아니라면 올바르지 않은 입력입니다.
+                <p>아니라면 올바르지 않은 입력입니다.</p>
                 <Button
                   onClick={() => {
                     setInputs((prev) => {

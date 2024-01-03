@@ -3,6 +3,7 @@ import Input from "./Input";
 import Textarea from "./Textarea";
 import Button from "./Button";
 import Line from "./Line";
+import Warning from "./Warning";
 
 export default function SetData({ next }: { next: (data: string) => void }) {
   const [name, setName] = useState("");
@@ -24,9 +25,8 @@ export default function SetData({ next }: { next: (data: string) => void }) {
   return (
     <>
       <div className="flex flex-col gap-2 p-5 m-5 bg-gray-200 font-mono">
-        먼저 시뮬레이션의 정보를 적어주세요.
-        <Line highlighted />
-        <span>
+        <p>먼저 시뮬레이션의 정보를 적어주세요.</p>
+        <Warning>
           name은 다른 시뮬레이션과 겹쳐서는 안됩니다. 다른 시뮬레이션의 이름은{" "}
           <a
             href="https://iamgamja.github.io/boj-visualizer/"
@@ -35,7 +35,8 @@ export default function SetData({ next }: { next: (data: string) => void }) {
             BOJ Visualizer
           </a>
           에서 확인할 수 있습니다.
-        </span>
+        </Warning>
+        <Line highlighted />
         <Input label="name" value={name} onChange={setName} />
         <Line highlighted />
         <Input label="link" value={link} onChange={setLink} />
