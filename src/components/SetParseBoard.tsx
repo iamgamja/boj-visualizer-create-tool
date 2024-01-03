@@ -56,7 +56,7 @@ const rule_options = {
   "항상 참인 조건": "() => true",
   "특정 문자": "({s}) => s === '#'",
   "특정 좌표 (변수 or 상수) (0-index)":
-    "({y, x}) => {const tmp_1 = '#'; const tmp_2 = '#'; return y === +(vars[tmp_1] ?? tmp_1) && x === +(vars[tmp_2] ?? tmp_2)}",
+    "({y, x}) => {const tmp_1 = '#'; const tmp_2 = '#'; return y === +(vars[tmp_1] ?? tmp_1) - (+#) && x === +(vars[tmp_2] ?? tmp_2) - (+#)}",
 } as const;
 type rule_options = typeof rule_options;
 
@@ -75,7 +75,7 @@ type ruleobj =
     }
   | {
       name: "특정 좌표 (변수 or 상수) (0-index)";
-      detail: [y: string, x: string];
+      detail: [y: string, x: string, y_m1: string, x_m1: string]; // *_m1: *에 -1을 해야 한다면 1, 아니면 0
     };
 
 const default_options = {
@@ -121,7 +121,9 @@ type cellType = {
 type InputType_board = {
   type: "board";
   N: string;
+  N_m1: string;
   M: string;
+  M_m1: string;
   space: boolean;
   cellTypes: cellType[];
 };
@@ -181,8 +183,12 @@ export default function SetParseBoard({
               `;
             } else {
               return `
-                const N = +(vars["${board.N}"] ?? "${board.N}");
-                const M = +(vars["${board.M}"] ?? "${board.M}");
+                const N = +(vars["${board.N}"] ?? "${board.N}") - (+${
+                board.N_m1
+              });
+                const M = +(vars["${board.M}"] ?? "${board.M}") - (+${
+                board.M_m1
+              });
 
                 const board = new Board(N, M);
 
@@ -336,28 +342,56 @@ export default function SetParseBoard({
                   두 입력은 board의 크기를 나타내기 때문에, 변수를 사용한다면
                   board보다 먼저 입력받아야 합니다.
                 </Warning>
-                <Input
-                  label="N (변수 or 상수)"
-                  value={t.N}
-                  onChange={(s) => {
-                    setInputs((prev) => {
-                      const now = [...prev];
-                      t.N = s;
-                      return now;
-                    });
-                  }}
-                />
-                <Input
-                  label="M (변수 or 상수)"
-                  value={t.M}
-                  onChange={(s) => {
-                    setInputs((prev) => {
-                      const now = [...prev];
-                      t.M = s;
-                      return now;
-                    });
-                  }}
-                />
+                <p>
+                  <Input
+                    label="N (변수 or 상수)"
+                    value={t.N}
+                    onChange={(s) => {
+                      setInputs((prev) => {
+                        const now = [...prev];
+                        t.N = s;
+                        return now;
+                      });
+                    }}
+                  />
+                  <Input
+                    type="checkbox"
+                    label="-1"
+                    value={t.N_m1}
+                    onChange={(s) => {
+                      setInputs((prev) => {
+                        const now = [...prev];
+                        t.N_m1 = s;
+                        return now;
+                      });
+                    }}
+                  />
+                </p>
+                <p>
+                  <Input
+                    label="M (변수 or 상수)"
+                    value={t.M}
+                    onChange={(s) => {
+                      setInputs((prev) => {
+                        const now = [...prev];
+                        t.M = s;
+                        return now;
+                      });
+                    }}
+                  />
+                  <Input
+                    type="checkbox"
+                    label="-1"
+                    value={t.M_m1}
+                    onChange={(s) => {
+                      setInputs((prev) => {
+                        const now = [...prev];
+                        t.M_m1 = s;
+                        return now;
+                      });
+                    }}
+                  />
+                </p>
                 <Line highlighted />
                 <p>
                   parsing 과정에서 각 칸을 다음과 같이 name으로 구분합니다.
@@ -421,7 +455,7 @@ export default function SetParseBoard({
                               name: t.cellTypes[idx_board].name,
                               rule: {
                                 name: v,
-                                detail: ["0", "0"],
+                                detail: ["0", "0", "0", "0"],
                               },
                               style: {
                                 backgroundColor: "bg-green-200",
@@ -457,30 +491,58 @@ export default function SetParseBoard({
                     {celltype.rule.name ===
                       "특정 좌표 (변수 or 상수) (0-index)" && (
                       <>
-                        <Input
-                          label="y"
-                          value={celltype.rule.detail[0].toString()}
-                          onChange={(s) => {
-                            setInputs((prev) => {
-                              const now = [...prev];
-                              celltype.rule.detail[0] = s;
-                              return now;
-                            });
-                          }}
-                          key={"y"}
-                        />
-                        <Input
-                          label="x"
-                          value={celltype.rule.detail[1].toString()}
-                          onChange={(s) => {
-                            setInputs((prev) => {
-                              const now = [...prev];
-                              celltype.rule.detail[1] = s;
-                              return now;
-                            });
-                          }}
-                          key={"x"}
-                        />
+                        <p>
+                          <Input
+                            label="y"
+                            value={celltype.rule.detail[0].toString()}
+                            onChange={(s) => {
+                              setInputs((prev) => {
+                                const now = [...prev];
+                                celltype.rule.detail[0] = s;
+                                return now;
+                              });
+                            }}
+                            key={"y"}
+                          />
+                          <Input
+                            type="checkbox"
+                            label="-1"
+                            value={celltype.rule.detail[2]}
+                            onChange={(s) => {
+                              setInputs((prev) => {
+                                const now = [...prev];
+                                celltype.rule.detail[2] = s;
+                                return now;
+                              });
+                            }}
+                          />
+                        </p>
+                        <p>
+                          <Input
+                            label="x"
+                            value={celltype.rule.detail[1].toString()}
+                            onChange={(s) => {
+                              setInputs((prev) => {
+                                const now = [...prev];
+                                celltype.rule.detail[1] = s;
+                                return now;
+                              });
+                            }}
+                            key={"x"}
+                          />
+                          <Input
+                            type="checkbox"
+                            label="-1"
+                            value={celltype.rule.detail[3]}
+                            onChange={(s) => {
+                              setInputs((prev) => {
+                                const now = [...prev];
+                                celltype.rule.detail[3] = s;
+                                return now;
+                              });
+                            }}
+                          />
+                        </p>
                       </>
                     )}
                     {celltype.rule.name === "특정 문자" && (
@@ -731,7 +793,9 @@ export default function SetParseBoard({
               now.push({
                 type: "board",
                 N: "N",
+                N_m1: "0",
                 M: "M",
+                M_m1: "0",
                 space: false,
                 cellTypes: [
                   {
@@ -765,7 +829,9 @@ export default function SetParseBoard({
               now.push({
                 type: "board",
                 N: "N",
+                N_m1: "0",
                 M: "M",
+                M_m1: "0",
                 space: true,
                 cellTypes: [
                   {
