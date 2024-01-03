@@ -55,7 +55,7 @@ const rule_options = {
   "항상 거짓인 조건": "() => false",
   "항상 참인 조건": "() => true",
   "특정 문자": "({s}) => s === '?'",
-  "특정 좌표 (변수 or 상수)":
+  "특정 좌표 (변수 or 상수) (0-index)":
     "({y, x}) => {const tmp_1 = '?'; const tmp_2 = '?'; return y === +(vars[tmp_1] ?? tmp_1) && x === +(vars[tmp_2] ?? tmp_2)}",
 } as const;
 type rule_options = typeof rule_options;
@@ -74,7 +74,7 @@ type ruleobj =
       detail: [string];
     }
   | {
-      name: "특정 좌표 (변수 or 상수)";
+      name: "특정 좌표 (변수 or 상수) (0-index)";
       detail: [y: string, x: string];
     };
 
@@ -371,8 +371,9 @@ export default function SetParseBoard({
                 {t.cellTypes.map((celltype, idx_board) => (
                   <div className="flex flex-col gap-2" key={idx_board}>
                     <p>
-                      {idx_board !== 0 && "아니고"} 만약 {celltype.rule.name}
-                      {celltype.rule.name === "특정 좌표 (변수 or 상수)" &&
+                      {idx_board !== 0 && "아니고"} 만약 {celltype.rule.name}{" "}
+                      {celltype.rule.name ===
+                        "특정 좌표 (변수 or 상수) (0-index)" &&
                         `(${celltype.rule.detail[0]}, ${celltype.rule.detail[1]})`}
                       {celltype.rule.name === "특정 문자" &&
                         `(${celltype.rule.detail[0]})`}{" "}
@@ -415,7 +416,7 @@ export default function SetParseBoard({
                               },
                               value: [],
                             };
-                          else if (v === "특정 좌표 (변수 or 상수)")
+                          else if (v === "특정 좌표 (변수 or 상수) (0-index)")
                             t.cellTypes[idx_board] = {
                               name: t.cellTypes[idx_board].name,
                               rule: {
@@ -453,7 +454,8 @@ export default function SetParseBoard({
                         });
                       }}
                     />
-                    {celltype.rule.name === "특정 좌표 (변수 or 상수)" && (
+                    {celltype.rule.name ===
+                      "특정 좌표 (변수 or 상수) (0-index)" && (
                       <>
                         <Input
                           label="y"
