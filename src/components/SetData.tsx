@@ -26,8 +26,10 @@ export default function SetData({ next }: { next: (data: string) => void }) {
     <>
       <div className="flex flex-col gap-2 p-5 m-5 bg-gray-200 font-mono">
         <p>먼저 시뮬레이션의 정보를 적어주세요.</p>
+        <Line highlighted />
         <Warning>
-          name은 다른 시뮬레이션과 겹쳐서는 안됩니다. 다른 시뮬레이션의 이름은{" "}
+          name은 다른 시뮬레이션과 겹치지 않아야 합니다. 다른 시뮬레이션의
+          이름은{" "}
           <a
             href="https://iamgamja.github.io/boj-visualizer/"
             className="underline"
@@ -36,7 +38,6 @@ export default function SetData({ next }: { next: (data: string) => void }) {
           </a>
           에서 확인할 수 있습니다.
         </Warning>
-        <Line highlighted />
         <Input label="name" value={name} onChange={setName} />
         <Line highlighted />
         <Input label="link" value={link} onChange={setLink} />
