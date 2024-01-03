@@ -21,9 +21,9 @@ function is_bg_color(s: string): s is keyof color {
 }
 
 const text_options = {
-  "항상 같은 문자": "() => '?'",
-  "cell의 값 사용": "({cell}) => cell.value['?']",
-  "board의 값 사용": "({board}) => board.value['?']",
+  "항상 같은 문자": "() => '#'",
+  "cell의 값 사용": "({cell}) => cell.value['#']",
+  "board의 값 사용": "({board}) => board.value['#']",
 } as const;
 type text_options = typeof text_options;
 
@@ -54,9 +54,9 @@ type styletype = {
 const rule_options = {
   "항상 거짓인 조건": "() => false",
   "항상 참인 조건": "() => true",
-  "특정 문자": "({s}) => s === '?'",
+  "특정 문자": "({s}) => s === '#'",
   "특정 좌표 (변수 or 상수) (0-index)":
-    "({y, x}) => {const tmp_1 = '?'; const tmp_2 = '?'; return y === +(vars[tmp_1] ?? tmp_1) && x === +(vars[tmp_2] ?? tmp_2)}",
+    "({y, x}) => {const tmp_1 = '#'; const tmp_2 = '#'; return y === +(vars[tmp_1] ?? tmp_1) && x === +(vars[tmp_2] ?? tmp_2)}",
 } as const;
 type rule_options = typeof rule_options;
 
@@ -79,8 +79,8 @@ type ruleobj =
     };
 
 const default_options = {
-  "특정 값(문자열)": "() => '?'",
-  "특정 값(수)": "() => ?",
+  "특정 값(문자열)": "() => '#'",
+  "특정 값(수)": "() => #",
   "입력값 사용(문자열)": "({s}) => s",
   "입력값 사용(수)": "({s}) => +s",
 } as const;
@@ -143,8 +143,8 @@ export default function SetParseBoard({
         ${board.cellTypes
           .map((celltype) => {
             let func: string = text_options[celltype.style.text.name];
-            while (func.includes("?"))
-              func = func.replace("?", celltype.style.text.detail.shift()!);
+            while (celltype.style.text.detail.length > 0)
+              func = func.replace("#", celltype.style.text.detail.shift()!);
             return `
               "${celltype.name}": {
                 backgroundColor: "${celltype.style.backgroundColor}",
@@ -212,8 +212,8 @@ export default function SetParseBoard({
             ${board.cellTypes
               .map((celltype, idx) => {
                 let func: string = rule_options[celltype.rule.name];
-                while (func.includes("?"))
-                  func = func.replace("?", celltype.rule.detail.shift()!);
+                while (celltype.rule.detail.length > 0)
+                  func = func.replace("#", celltype.rule.detail.shift()!);
                 return `
                   ${
                     idx === 0 ? "" : "else"
@@ -229,9 +229,9 @@ export default function SetParseBoard({
                                   .map(({ name, type }) => {
                                     let func: string =
                                       default_options[type.name];
-                                    while (func.includes("?"))
+                                    while (type.detail.length > 0)
                                       func = func.replace(
-                                        "?",
+                                        "#",
                                         type.detail.shift()!
                                       );
                                     return `
@@ -253,9 +253,9 @@ export default function SetParseBoard({
                                   .map(({ name, type }) => {
                                     let func: string =
                                       default_options[type.name];
-                                    while (func.includes("?"))
+                                    while (type.detail.length > 0)
                                       func = func.replace(
-                                        "?",
+                                        "#",
                                         type.detail.shift()!
                                       );
                                     return `
