@@ -768,7 +768,7 @@ export default function SetParseBoard({
                     });
                   }}
                 >
-                  규칙 추가
+                  name 추가
                 </Button>
                 <Line highlighted />
               </>
