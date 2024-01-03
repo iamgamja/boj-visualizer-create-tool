@@ -1,10 +1,21 @@
 import { useState } from "react";
 import SetData from "./components/SetData";
+import SetParseBoard from "./components/SetParseBoard";
 
 export default function App() {
   const [step, setStep] = useState(0);
   const [data, setData] = useState<string[]>([
-    'import { Cell, State, Board, stepstype, datatype, Direction } from "../utils";',
+    `
+      /* eslint-disable @typescript-eslint/no-explicit-any */
+      import {
+        Cell,
+        Board,
+        stepstype,
+        datatype,
+        Direction,
+        styletype,
+      } from "../utils";
+    `.trim(),
   ]);
 
   function nextStep(data: string) {
@@ -24,6 +35,7 @@ export default function App() {
         </code>
 
         {step === 0 && <SetData next={nextStep} />}
+        {step === 1 && <SetParseBoard next={nextStep} />}
       </div>
     </>
   );

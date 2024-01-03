@@ -1,8 +1,10 @@
 export default function Textarea({
-  label = "",
+  label,
+  value,
   onChange,
 }: {
-  label?: string;
+  label: string;
+  value: string;
   onChange: (s: string) => void;
 }) {
   return (
@@ -11,6 +13,7 @@ export default function Textarea({
       {" : "}
       <div>
         <textarea
+          value={value}
           className="my-2 font-mono text-sm h-16 border-none outline-none"
           onChange={(e) => onChange(e.target.value)}
         ></textarea>

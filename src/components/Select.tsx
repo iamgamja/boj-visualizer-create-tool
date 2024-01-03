@@ -1,11 +1,11 @@
-export default function Input({
-  type,
+export default function Select({
   label,
+  options,
   value,
   onChange,
 }: {
-  type?: React.HTMLInputTypeAttribute;
   label: string;
+  options: string[];
   value: string;
   onChange: (s: string) => void;
 }) {
@@ -13,12 +13,17 @@ export default function Input({
     <label>
       {label}
       {" : "}
-      <input
-        type={type}
+      <select
         className="my-2 font-mono text-sm border-none outline-none"
-        value={value}
         onChange={(e) => onChange(e.target.value)}
-      ></input>
+        value={value}
+      >
+        {options.map((s, idx) => (
+          <option value={s} key={idx}>
+            {s}
+          </option>
+        ))}
+      </select>
     </label>
   );
 }
